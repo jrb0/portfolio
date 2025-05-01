@@ -1,4 +1,4 @@
-# Jonathan Bachrach | Analyst Portfolio
+# Jonathan Bachrach - Analyst Portfolio
 
 ## Summary
 
