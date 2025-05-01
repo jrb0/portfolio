@@ -1,6 +1,10 @@
-# portfolio
+# Data Visualization - Sample Code
 
+The below is an example of a data visualization I designed and executed using ggplot2. The plot is an attempt to refine and improve upon figure 2 of the 2021 article published by Keele, et al. (Suppressing Black Votes: A Historical Case Study of Voting Restrictions in Louisiana) which shows the racial disparity in voter registration rates under the mid-20th century "Understanding Clause" which required Louisiana voters to provide a "‘reasonable interpretation’ of a section of the state’s constitution" before voting.
 
+The code chunk begins by filtering NA values from the data, then grouping it by year, understanding clause status, and race. It then establishes a grid and line graph using year and registration rate as x and y variables, respectively. The rest of the code chunk refines the visualization to make it more digestible and intuitive, focusing on contrasting colors, font size and spacing, labeling, and readability. It also improves upon the original chart by adding a highlighted section for the years affected by the Understanding Clause in order to highlight the linkage between the clause's implementation and registration disparities.
+
+I've included the code below along with the output generated upon its execution:
 
 ```
 filter(la_turnout_long, !is.na(year), !is.na(regrate)) %>%
@@ -57,5 +61,6 @@ filter(la_turnout_long, !is.na(year), !is.na(regrate)) %>%
         strip.background = element_rect(fill = "#132F13", 
                                         color = "black", 
                                         size = 1),
-        )```
+        )
+```
 
