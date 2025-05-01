@@ -1,0 +1,189 @@
+---
+title: "Does the success of MLB teams affect rent prices in areas surrounding baseball stadiums?"
+subtitle: "⚾"
+author: "Johnny Bachrach"
+date: "April 9th, 2025"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, fc, default-fonts]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+      
+---
+
+
+```{r setup, include=FALSE}
+## Libraries
+  library(knitr)
+  library(rmdformats)
+  library(Lahman)             
+  library(tidyverse)
+  library(dplyr)
+  library(baseballr)
+  library(scales)
+  library(lfe)
+  library(modelsummary)
+
+## Global options
+knitr::opts_chunk$set(
+  echo = FALSE, prompt = FALSE,
+  tidy = FALSE, comment = NA,
+  message = FALSE, warning = FALSE,
+  fig.align = 'center'
+)
+
+new_filtered_test <- read.csv('new.filtered.test.csv')
+```
+
+# Overview
+
+.pull-left[## Question:
+
+- Does the success of a given MLB team in a particular year cause **rent prices in nearby homes and apartments to rise** in the following year?]
+
+.pull-right[## Findings:
+
+- For every additional win earned by an MLB team in a particular year, rent prices in the zip code where the stadium is located are expected to rise **$2.25/month** the following year _(after controlling for citywide rent prices)_.]
+
+
+---
+
+# Data
+
+## Rent Data
+
+- **Zillow Observed Rent Index** _(ZORI)_
+  - Mean of listed rents that fall into the 35th to 65th percentile range for all homes and apartments in a given region.
+  
+
+<img src="Zillow_Wordmark_Blue_RGB lrg.png" width="25%" style="display: block; margin: auto;" />
+
+## Historical Wins by Year by MLB Team
+
+- Pulled from **Lahman Baseball Database** using r package "Lahman".
+- Tested wins variable **lagged by 1, 2, and 3 years** to understand postponed effects of success.
+
+<img src="SABR_logo-square-700px.png" width="15%" style="display: block; margin: auto;" />
+
+---
+
+# After controlling for citywide rent prices, each additional win was associated with a **$2.25/month** rise in average rent price.
+
+.center.middle[.pull-right[ ## Results: Regression controlling for citywide rent
+```{r}
+library(broom)
+library(knitr)
+library(kableExtra)
+
+mods <- 
+  new_filtered_test %>%
+  filter(HR_year != 2020) %>%
+  { 
+    list(Regression = felm(rent ~ W + mean_rent, data = .))
+  }
+
+modelsummary(
+  mods, 
+  gof_map = c('nobs'), 
+  stars = TRUE, 
+  output = 'gt'
+)
+
+```
+
+
+.center[_** *Filtered to exclude shortened 2020 season **_]
+
+]]
+
+.pull-left[
+```{r, fig.align='center', echo=FALSE, fig.width=7, fig.height=7}
+
+new_filtered_test %>%
+  filter(HR_year != 2020) %>%
+  group_by(CODE) %>%
+  filter(n() >= 5) %>%
+  ungroup() %>%
+  ggplot(aes(x = W, y = rent)) +
+  scale_y_continuous(
+    breaks = seq(0, max(new_filtered_test$rent, na.rm = TRUE), by = 1000),
+    limits = c(750, NA),
+    labels = scales::label_dollar()
+  ) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, size = 1, color = "#fd5c0b") +
+  labs(x = "Wins in Prior Year",
+       y = "Monthly Rent") +
+  theme_classic() +
+  theme(plot.background = element_rect(fill = "#fafafa", color = "#fafafa"),
+        panel.background = element_rect(fill = "#fafafa", color = "#fafafa"),
+        axis.title.x = element_text(size = 15, margin = margin(t = 15)),
+        axis.title.y = element_text(size = 15, margin = margin(r = 15)),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12))
+```
+]
+---
+
+# Some key takeaways 
+
+.pull-left[
+- Rent price as a potential confounding variable; **citywide rent variable added as control** to account for noise introduced by variations in rent price.
+
+- **Strongest effect** was seen in the year immediately following a successful season.
+
+- **Limited availability of zip code specific rent price data** makes granular evaluation difficult, but team-level data shows interesting trends.
+
+- Results varied significantly from team to team; few teams independently reached statistical significant _(SDN, WAS, BAL, SDN)_
+
+]
+
+
+.pull-right[
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+new_filtered_test %>%
+  filter(HR_year != 2020) %>%
+  group_by(CODE) %>%
+  filter(n() >= 5) %>%
+  ungroup() %>%
+  ggplot(aes(x = W, y = rent)) +
+  scale_y_continuous(
+    breaks = seq(0, max(new_filtered_test$rent, na.rm = TRUE), by = 1000),
+    limits = c(750, NA),
+    labels = scales::label_dollar()
+  ) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, size = 1, color = "#fd5c0b") +
+  labs(x = "Wins in Prior Year",
+       y = "Monthly Rent") +
+  theme_classic() +
+  theme(plot.background = element_rect(fill = "#fafafa", color = "#fafafa"),
+        panel.background = element_rect(fill = "#fafafa", color = "#fafafa"),
+        axis.title.x = element_text(size = 15, margin = margin(t = 15)),
+        axis.title.y = element_text(size = 15, margin = margin(r = 15)),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12)) +
+  facet_wrap(~ CODE)
+```
+]
+
+
+---
+
+# Potential Improvements for Future Study
+
+## Limited availability of zip code level rent data
+- Analysis was conducted with only 149 observations, making findings difficult to verify on a team level.
+
+## Zip code not a perfect proxy for surrounding neighborhood
+- Future study could use coordinate data to establish standard geoperimeter around stadiums.]
+
+## Additional control variables may improve validity
+- Examples include population size/market size, urban development, etc.
+
+## Isolate home wins as explanatory variable
+- Are rent prices more responsive when a team is successful in their home stadium?
