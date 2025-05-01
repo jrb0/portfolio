@@ -13,6 +13,7 @@ I've included the code below along with the output generated upon its execution:
 ![My plot](plot.png)
 
 ## [Code Chunk]()
+* See file [here](https://github.com/jrb0/portfolio/blob/main/data_visualization.r) for syntax-highlighted code. 
 
 ```
 # Filter out rows with missing year or registration rate
