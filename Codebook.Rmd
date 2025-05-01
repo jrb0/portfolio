@@ -1,0 +1,310 @@
+---
+title: "Codebook | Federal Transit Administration | 2023 Annual Energy Consumption and Fare Data"
+output: pdf_document
+author: "Johnny Bachrach"
+date: "2025-04-20"
+---
+
+```{r setup, include=FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+energy_fares <- read.csv('energy_fares.csv')
+
+summary_stats <- function(var){
+  require(dplyr)
+  require(knitr)
+  require(magrittr)
+  
+  table <- energy_fares %>%
+    summarize(
+      Min = min({{ var }}, na.rm=T),
+      Mean = mean({{ var }}, na.rm=T),
+      Median = median({{ var }}, na.rm=T),
+      Max = max({{ var }}, na.rm=T),
+    ) %>%
+    kable(
+      digits = 1L)
+  
+  return(table)
+}
+
+summary_counts <- function(var) {
+  require(dplyr)
+  require(knitr)
+  require(magrittr)
+  
+  table <- energy_fares %>%
+    count({{ var }}, sort = TRUE) %>%
+    rename(Count = n) %>%
+    kable()
+  
+  return(table)
+}
+
+summary_stats(Gasoline)
+```
+
+# Overview of Data
+
+This data set contains information on the reported annual consumption of fuel and energy, as well as annual collected fares, for public transportation programs across the United States in the year 2023. The data is organized by agency name (i.e. the entity that manages each public transportation program, with each agency receiving a unique ID), as well as mode (form of transit service) and type of service (whether the service is directly operated by the agency itself or through a third party agency).
+
+For each observation, the first 14 variables represent the quantity of each type of fuel or energy used in 2023 for the indicated mode of transportation reported by each transit agency. The final three variables represent fares collected for each mode of transportation in 2023, broken into fares that were paid directly by riders/users of the service and fares that were subsidized by third parties like employers, government programs, etc.
+
+# Sources and Methodology
+
+This data set is a combination of two separate files publicly published by the Federal Transit Administration (FTA) in the National Transit Database (NTD), a public-facing repository of transit related data. Variables on energy consumption were pulled from the data set "2023 Annual Database Energy Consumption" while fare volume data was collected from from the file "2023 Annual Database Fare Revenues".
+
+The two original data sets were merged together based on the unique combination of agency name/ID and mode to better facilitate analysis of the interaction of fares and energy/fuel consumption on a granular basis. The data was then cleaned to standardize NA variables (or replace with 0 for numeric variables), pivot the "other fuel type" variable (which was previously populated with manually inputted fuel types) to a standard variable, and remove irrelevant or unpopulated variables from the final data set.
+
+# Variables 
+
+## NTD ID
+
+**Variable Name:** NTD ID  
+**Variable Type**: Numeric  
+**Description**: Unique identifier assigned to each agency by the FTA.
+
+## Agency Name
+
+**Variable Name:** Agency.Name  
+**Variable Type**: Character  
+**Description**: Name of the agency that administers the transit service.
+
+## Reporter Type
+
+**Variable Name:** Reporter.Type  
+**Variable Type**: Character  
+**Description**: Classification of the type of agency reporting energy/fuel usage and fare data to the FTA. Different reporter types are subject to different requirements for reporting (i.e. levels of specificity, etc.)
+
+```{r, echo = FALSE}
+summary_counts(Reporter.Type)
+```
+
+## Reporting Module
+
+**Variable Name:** Reporting.Module    
+**Variable Type**: Character  
+**Description**: Classification of the geography/urban demographic of the reporting agency (broader than reporter type).
+
+```{r, echo = FALSE}
+summary_counts(Reporting.Module)
+```
+
+## Mode
+
+**Variable Name:** Mode  
+**Variable Type**: Character  
+**Description**: The specific mode of transportation being provided.
+
+```{r, echo = FALSE}
+summary_counts(Mode)
+```
+
+| Code | Transit Service                  |
+|------|----------------------------------|
+| DR   | Demand Response                  |
+| MB   | Motor Bus                        |
+| CB   | Commuter Bus                     |
+| VP   | Vanpool                          |
+| FB   | Ferryboat                        |
+| CR   | Commuter Rail                    |
+| SR   | Streetcar (Rail)                 |
+| LR   | Light Rail                       |
+| RB   | Rapid Bus or BRT (Bus Rapid Transit) |
+| HR   | Heavy Rail                       |
+| MG   | Monorail / Automated Guideway    |
+| YR   | Hybrid Rail                      |
+| TB   | Trolleybus                       |
+| IP   | Inclined Plane                   |
+| TR   | Tram                             |
+| AR   | Aerial Tramway                   |
+| CC   | Cable Car                        |
+| PB   | Públic (Puerto Rico)             |
+
+## TOS
+
+**Variable Name:** TOS  
+**Variable Type**: Character  
+**Description**: Whether a mode of transportation is agency-run or provided through a third party contractor.
+
+```{r, echo = FALSE}
+summary_counts(TOS)
+```
+
+| Code | Type of Service         | Description           |
+|------|-------------------------|-----------------------|
+| DO   | Directly Operated       | Agency-run service    |
+| PT   | Purchased Transportation| Contractor-provided   |
+| TX   | Taxi - Dedicated        | Standard taxi service |
+| TN   | Taxi - Non-Dedicated    | Rideshare (Uber, etc.)|
+
+
+## Bio-Diesel
+
+**Variable Name:** Bio.Diesel  
+**Variable Type**: Numeric  
+**Description**: Gallons of bio-diesel fuel used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Bio.Diesel)
+```
+
+## Bunker Fuel
+
+**Variable Name:** Bunker.Fuel  
+**Variable Type**: Numeric  
+**Description**: Gallons of bunker fuel used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Bunker.Fuel)
+```
+
+## C Natural Gas
+
+**Variable Name:** C.Natural.Gas  
+**Variable Type**: Numeric  
+**Description**: Cubic feet of natural gas used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(C.Natural.Gas)
+```
+
+## Diesel Fuel
+
+**Variable Name:** Diesel.Fuel  
+**Variable Type**: Numeric  
+**Description**: Gallons of diesel fuel used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Diesel.Fuel)
+```
+
+## Electric Battery
+
+**Variable Name:** Electric.Battery  
+**Variable Type**: Numeric  
+**Description**: Kilowatt hours (kWh) of electric battery used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Electric.Battery)
+```
+
+## Electric Propulsion
+
+**Variable Name:** Gasoline  
+**Variable Type**: Numeric  
+**Description**: Kilowatt hours (kWh) of electric propulsion used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Electric.Propulsion)
+```
+
+## Ethanol	
+
+**Variable Name:** Ethanol  
+**Variable Type**: Numeric  
+**Description**: Gallons of ethanol used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Ethanol)
+```
+
+## Methonal
+
+**Variable Name:** Methonal  
+**Variable Type**: Numeric  
+**Description**: Gallons of methanol used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Methonal)
+```
+
+## Gasoline
+
+**Variable Name:** Gasoline  
+**Variable Type**: Numeric  
+**Description**: Gallons of gasoline used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Gasoline)
+```
+
+## Hydrogen
+
+**Variable Name:** Hydrogen  
+**Variable Type**: Numeric  
+**Description**: Kilograms of hydrogen used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Hydrogen)
+```
+
+## Kerosene
+
+**Variable Name:** Kerosene  
+**Variable Type**: Numeric  
+**Description**: Gallons of Kerosene used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Kerosene)
+```
+
+## Liquified Nat Gas	
+
+**Variable Name:** Liquified.Nat.Gas  
+**Variable Type**: Numeric  
+**Description**: Gallons of liquified natural gas used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Liquified.Nat.Gas)
+```
+
+## Liquified Petroleum Gas	
+
+**Variable Name:** Liquified.Petroleum.Gas  
+**Variable Type**: Numeric  
+**Description**: Gallons of liquified petroleum gas used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Liquified.Petroleum.Gas)
+```
+
+## Renewable Diesel
+
+**Variable Name:** Renewable.Diesel  
+**Variable Type**: Numeric  
+**Description**: Gallons of renewable diesel used in 2023.
+
+```{r, echo = FALSE}
+summary_stats(Renewable.Diesel)
+```
+
+## Passenger Paid Fares	
+
+**Variable Name:** Passenger.Paid.Fares  
+**Variable Type**: Numeric  
+**Description**: Fares paid directly by riders in 2023 (USD).
+
+```{r, echo = FALSE}
+summary_stats(Passenger.Paid.Fares)
+```
+
+## Organization Paid Fares	
+
+**Variable Name:** Organization.Paid.Fares  
+**Variable Type**: Numeric  
+**Description**: Fares paid by third party organizations (i.e. employers, government programs, etc.) in 2023 (USD).
+
+```{r, echo = FALSE}
+summary_stats(Organization.Paid.Fares)
+```
+
+## Total Fares
+
+**Variable Name:** Total.Fares  
+**Variable Type**: Numeric  
+**Description**: Sum of all fares paid in 2023 (USD).
+
+```{r, echo = FALSE}
+summary_stats(Total.Fares)
+```
