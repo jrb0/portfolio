@@ -6,6 +6,8 @@ The code chunk begins by filtering NA values from the data, then grouping it by 
 
 I've included the code below along with the output generated upon its execution:
 
+![My plot](plot.png)
+
 ```
 filter(la_turnout_long, !is.na(year), !is.na(regrate)) %>%
   group_by(year, understandingclause2, race) %>% 
